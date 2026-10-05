@@ -1,0 +1,129 @@
+:root {
+  --hz: 40;                            /* horizon height, % of the screen (script.js uses the same number) */
+  --fw: clamp(54px, 8.5vmin, 110px);   /* box a flower is fitted into at "arm's length"; nearer ones scale up */
+  --fh: clamp(96px, 17vmin, 220px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: #cfe9f3;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ---------- sky, hills, grass ---------- */
+
+.scene {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(#bfe2f0 0%, #e4f3ee 28%, #f8efe0 calc(var(--hz) * 1%));
+}
+
+.sun {
+  position: absolute;
+  right: 12%; top: 7%;
+  width: clamp(120px, 24vmin, 260px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 246, 214, .95) 0%, rgba(255, 246, 214, .55) 38%, rgba(255, 246, 214, 0) 70%);
+}
+
+.hill { position: absolute; border-radius: 50%; }
+.hill.a {
+  left: -18%; width: 78%;
+  top: calc(var(--hz) * 1% - 9vh); height: 24vh;
+  background: #bddba7;
+}
+.hill.b {
+  right: -22%; width: 84%;
+  top: calc(var(--hz) * 1% - 5.5vh); height: 22vh;
+  background: #a9d190;
+}
+
+.ground {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  top: calc(var(--hz) * 1% - 1px);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg stroke='%23ffffff' stroke-opacity='.14' stroke-width='1.4' stroke-linecap='round' fill='none'%3E%3Cpath d='M8 18l-2-7M10 18l1-8M12 18l3-6'/%3E%3Cpath d='M38 46l-2-7M40 46l1-8M42 46l3-6'/%3E%3C/g%3E%3Cg stroke='%23306b34' stroke-opacity='.16' stroke-width='1.4' stroke-linecap='round' fill='none'%3E%3Cpath d='M44 14l-2-6M46 14l1-7M48 14l3-5'/%3E%3Cpath d='M16 52l-2-6M18 52l1-7M20 52l3-5'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(#95c978 0%, #7bb561 55%, #5f9c4e 100%);
+}
+
+/* ---------- the flowers ---------- */
+
+.field {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.fl {
+  position: absolute;
+  left: calc(var(--nx) * 100%);
+  top: calc((var(--hz) + (100 - var(--hz)) * var(--ny)) * 1%);
+  width: calc(var(--fw) * var(--k));
+  height: calc(var(--fh) * var(--k));
+  object-fit: contain;
+  object-position: 50% 100%;
+  transform-origin: 50% 100%;
+  translate: -50% -100%;
+  transform: scaleX(var(--flip, 1));
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  animation: sway var(--d, 5s) ease-in-out var(--dl, 0s) infinite alternate;
+}
+
+.fl.grow {
+  animation:
+    grow .9s cubic-bezier(.2, .9, .3, 1.2) var(--gd, 0s) backwards,
+    sway var(--d, 5s) ease-in-out var(--dl, 0s) infinite alternate;
+}
+
+@keyframes sway {
+  from { rotate: calc(var(--tilt, 0deg) - 2.2deg); }
+  to   { rotate: calc(var(--tilt, 0deg) + 2.2deg); }
+}
+
+@keyframes grow {
+  from { scale: .05; opacity: 0; }
+  to   { scale: 1; opacity: 1; }
+}
+
+/* ---------- reset button (icon only) ---------- */
+
+.reset {
+  position: fixed;
+  left: max(14px, env(safe-area-inset-left));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 6;
+  width: 46px; height: 46px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .8);
+  color: #3f7a3a;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(30, 70, 30, .22);
+  transition: transform .15s ease, background .15s ease;
+}
+.reset:hover { background: #fff; }
+.reset:active { transform: rotate(-90deg) scale(.92); }
+.reset svg { width: 22px; height: 22px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fl, .fl.grow { animation: none; }
+}
