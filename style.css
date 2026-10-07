@@ -59,6 +59,14 @@ body {
     linear-gradient(#95c978 0%, #7bb561 55%, #5f9c4e 100%);
 }
 
+.center-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
 /* ---------- the flowers ---------- */
 
 .field {
