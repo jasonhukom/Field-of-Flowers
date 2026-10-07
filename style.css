@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&display=swap');
+
 
 :root {
   --hz: 40;                            /* horizon height, % of the screen (script.js uses the same number) */
@@ -61,19 +61,6 @@ body {
     linear-gradient(#95c978 0%, #7bb561 55%, #5f9c4e 100%);
 }
 
-.center-text {
-    position: fixed;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-
-    color: #ff4f9a;
-    font-family: 'Poppins', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    text-align: center;
-    white-space: nowrap;
-}
 
 /* ---------- the flowers ---------- */
 
