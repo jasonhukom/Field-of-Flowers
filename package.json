@@ -1,0 +1,12 @@
+{
+  "name": "field-of-flowers",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tap-to-plant flower field with music",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

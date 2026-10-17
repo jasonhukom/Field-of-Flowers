@@ -4,25 +4,100 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="light">
+  <meta name="description" content="A field of flowers. Tap to plant, change the scenery and play some music.">
   <title>🌼</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="scene" aria-hidden="true">
-    <div class="sun"></div>
-    <div class="hill a"></div>
-    <div class="hill b"></div>
-    <div class="ground"></div>
-  </div>
+  <!-- backgrounds are drawn into here by scenes.js -->
+  <div id="scene" class="scene" aria-hidden="true"></div>
 
-  <!-- flowers grow here; tap or drag anywhere on the grass to plant more -->
+  <!-- flowers grow here; tap or drag on the grass / soil to plant more -->
   <main id="field" class="field" aria-hidden="true"></main>
 
-  <button id="reset" class="reset" type="button" aria-label="New field">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
-  </button>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
+  <!-- ===== settings: a gear that fans buttons upward ===== -->
+  <nav id="menu" class="menu" aria-label="Settings">
+    <div id="fan" class="fan" role="menu">
+      <button id="btnSearch" class="fab" type="button" role="menuitem" data-label="Search music" aria-label="Search music" style="--i:1">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+      </button>
+      <button id="btnUpload" class="fab" type="button" role="menuitem" data-label="Upload music" aria-label="Upload music" style="--i:2">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>
+      </button>
+      <button id="btnBg" class="fab" type="button" role="menuitem" data-label="Change background" aria-label="Change background" data-sfx="none" style="--i:3">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M3.5 18l5.5-5 4 3.5 3-2.5 4.5 4"/></svg>
+      </button>
+      <button id="btnReload" class="fab" type="button" role="menuitem" data-label="New flowers" aria-label="New flowers" data-sfx="none" style="--i:4">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
+      </button>
+    </div>
+    <button id="settings" class="fab main" type="button" aria-label="Settings" aria-haspopup="menu" aria-expanded="false" data-sfx="none">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>
+    </button>
+  </nav>
+
+  <!-- ===== music search / library ===== -->
+  <section id="panel" class="panel" aria-label="Music" hidden>
+    <header class="panel-head">
+      <form id="searchForm" class="search" autocomplete="off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+        <input id="q" type="search" placeholder="Search for a song or artist…" aria-label="Search music" enterkeyhint="search">
+        <button type="submit" class="go">Search</button>
+      </form>
+      <button id="panelClose" class="icon" type="button" aria-label="Close search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </header>
+    <div class="tabs" role="tablist">
+      <button class="tab on" type="button" role="tab" data-tab="results">Results</button>
+      <button class="tab" type="button" role="tab" data-tab="library">Saved <span id="libCount" class="count">0</span></button>
+    </div>
+    <div id="list" class="list" role="list"></div>
+  </section>
+
+  <input id="file" type="file" accept="audio/*" multiple hidden>
+
+  <!-- ===== player: bottom middle ===== -->
+  <section id="player" class="player" aria-label="Music player" hidden>
+    <input id="seek" class="range seek" type="range" min="0" max="1000" value="0" aria-label="Seek">
+    <div class="prow">
+      <div class="meta">
+        <img id="art" class="art" alt="" hidden>
+        <div class="art ph" id="artPh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></div>
+        <div class="txt"><b id="title">Nothing playing</b><span id="sub">Search or upload a song</span></div>
+      </div>
+
+      <div class="ctrls">
+        <button id="auto" class="ctl auto on" type="button" aria-pressed="true" aria-label="Autoplay next song" title="Autoplay">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/></svg>
+          <i>Auto</i>
+        </button>
+        <button id="prev" class="ctl" type="button" aria-label="Previous song">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="solid"><path d="M7 5v14"/><path d="M19 5.5v13a1 1 0 0 1-1.6.8l-8.7-6.5a1 1 0 0 1 0-1.6l8.7-6.5a1 1 0 0 1 1.6.8z"/></svg>
+        </button>
+        <button id="play" class="ctl big" type="button" aria-label="Play">
+          <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true" class="solid"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.5-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg>
+          <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true" class="solid" hidden><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>
+          <span id="spin" class="spin" hidden></span>
+        </button>
+        <button id="next" class="ctl" type="button" aria-label="Next song">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="solid"><path d="M17 5v14"/><path d="M5 5.5v13a1 1 0 0 0 1.6.8l8.7-6.5a1 1 0 0 0 0-1.6L6.6 4.7A1 1 0 0 0 5 5.5z"/></svg>
+        </button>
+      </div>
+
+      <div class="vol">
+        <svg id="icoVol" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+        <input id="vol" class="range" type="range" min="0" max="100" value="70" aria-label="Volume">
+      </div>
+    </div>
+  </section>
+
+  <script src="sfx.js"></script>
+  <script src="scenes.js"></script>
+  <script src="player.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
