@@ -39,24 +39,26 @@
     </button>
   </nav>
 
-  <!-- ===== music search / library ===== -->
-  <section id="panel" class="panel" aria-label="Music" hidden>
-    <header class="panel-head">
-      <form id="searchForm" class="search" autocomplete="off">
+  <!-- ===== floating search bar: stands as a floating button / pill ===== -->
+  <div id="searchBar" class="floating-search" hidden>
+    <div class="search-wrap">
+      <form id="searchForm" class="search-pill" autocomplete="off">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
         <input id="q" type="search" placeholder="Search for a song or artist…" aria-label="Search music" enterkeyhint="search">
-        <button type="submit" class="go">Search</button>
+        <button type="submit" class="search-go">Search</button>
       </form>
-      <button id="panelClose" class="icon" type="button" aria-label="Close search">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      <button id="searchClose" class="ctl close-pill" type="button" aria-label="Close search" title="Close search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
-    </header>
-    <div class="tabs" role="tablist">
-      <button class="tab on" type="button" role="tab" data-tab="results">Results</button>
-      <button class="tab" type="button" role="tab" data-tab="library">Saved <span id="libCount" class="count">0</span></button>
     </div>
-    <div id="list" class="list" role="list"></div>
-  </section>
+    <div id="searchResults" class="floating-results" hidden>
+      <div class="tabs" role="tablist">
+        <button class="tab on" type="button" role="tab" data-tab="results">Results</button>
+        <button class="tab" type="button" role="tab" data-tab="library">Saved <span id="libCount" class="count">0</span></button>
+      </div>
+      <div id="list" class="list" role="list"></div>
+    </div>
+  </div>
 
   <input id="file" type="file" accept="audio/*" multiple hidden>
 
@@ -64,12 +66,6 @@
   <section id="player" class="player" aria-label="Music player">
     <input id="seek" class="range seek" type="range" min="0" max="1000" value="0" aria-label="Seek">
     <div class="prow">
-      <div class="meta" id="playerMeta">
-        <img id="art" class="art" alt="" hidden>
-        <div class="art ph" id="artPh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></div>
-        <div class="txt"><b id="title">Field of Flowers</b><span id="sub">Search or upload a song</span></div>
-      </div>
-
       <div class="ctrls">
         <button id="btnPlayerSearch" class="ctl search-btn" type="button" aria-label="Search music" title="Search music">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
@@ -91,14 +87,31 @@
         </button>
       </div>
 
+      <!-- Music whereabouts (title & artist) right next to the next button! -->
+      <div class="meta whereabouts" id="playerMeta">
+        <img id="art" class="art" alt="" hidden>
+        <div class="art ph" id="artPh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></div>
+        <div class="txt"><b id="title">Field of Flowers</b><span id="sub">Search or upload a song</span></div>
+      </div>
+
       <div class="vol">
         <button id="btnMute" class="ctl mute-btn" type="button" aria-label="Mute/unmute" title="Volume">
           <svg id="icoVol" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
         </button>
         <input id="vol" class="range" type="range" min="0" max="100" value="70" aria-label="Volume">
       </div>
+
+      <!-- Small X button that closes the bottom player -->
+      <button id="playerClose" class="ctl close-btn" type="button" aria-label="Close music bar" title="Close music bar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
     </div>
   </section>
+
+  <!-- Small floating button to restore player when closed -->
+  <button id="btnRestorePlayer" class="ctl restore-btn" type="button" aria-label="Show music player" title="Music player" hidden>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+  </button>
 
   <script src="sfx.js"></script>
   <script src="scenes.js"></script>

@@ -10,7 +10,8 @@
 
   var LIB_KEY = 'field.library.v1', PREF_KEY = 'field.prefs.v1', CACHE = 'field-music-v1';
 
-  var panel = $('panel'), player = $('player'), list = $('list'), form = $('searchForm'), q = $('q');
+  var searchBar = $('searchBar'), searchResults = $('searchResults'), player = $('player'), list = $('list'), form = $('searchForm'), q = $('q');
+  var searchClose = $('searchClose'), playerClose = $('playerClose'), btnRestorePlayer = $('btnRestorePlayer');
   var seek = $('seek'), vol = $('vol'), playBtn = $('play');
 
   var audio = new Audio();
@@ -145,9 +146,13 @@
     list.textContent = '';
 
     if (tab === 'results') {
+      if (!searched && !searching) {
+        if (searchResults) searchResults.hidden = true;
+        return;
+      }
+      if (searchResults) searchResults.hidden = false;
       if (searching) return list.appendChild(message('<span class="em">🔍</span>Searching…'));
       if (searchError) return list.appendChild(message('<span class="em">🥀</span>' + searchError, 'err'));
-      if (!searched) return list.appendChild(message('<span class="em">🎶</span><b>Search any song</b><br>and it will be saved in your browser for next time.'));
       if (!results.length) return list.appendChild(message('<span class="em">🌧️</span>Nothing found. Try other words.'));
       results.forEach(function (r) {
         var id = 'yt:' + r.id, i = indexOfId(id);
@@ -157,6 +162,7 @@
         }));
       });
     } else {
+      if (searchResults) searchResults.hidden = false;
       if (!lib.length) return list.appendChild(message('<span class="em">📼</span><b>No saved songs yet</b><br>Play a search result or upload a file and it shows up here.'));
       lib.forEach(function (s, i) {
         list.appendChild(row(s, {
@@ -396,18 +402,45 @@
     })['catch'](function () { hooks.toast('Couldn’t save that file in the browser'); });
   });
 
-  /* ---------- panel / dock visibility ---------- */
+  /* ---------- search / player visibility ---------- */
 
-  function showPlayer() { player.hidden = false; }
+  function setPlayerVisible(visible) {
+    player.hidden = !visible;
+    if (btnRestorePlayer) btnRestorePlayer.hidden = visible;
+  }
 
   function setPanel(open) {
-    panel.hidden = !open;
+    if (!searchBar) return;
+    searchBar.hidden = !open;
     $('btnSearch').classList.toggle('active', open);
     if ($('btnPlayerSearch')) $('btnPlayerSearch').classList.toggle('active', open);
     if (open) {
       render();
-      if (!lib.length || tab === 'results') setTimeout(function () { if (!panel.hidden && window.innerWidth > 700) q.focus(); }, 60);
+      setTimeout(function () { if (!searchBar.hidden) q.focus(); }, 60);
+    } else {
+      if (searchResults) searchResults.hidden = true;
     }
+  }
+
+  if (searchClose) {
+    searchClose.addEventListener('click', function () {
+      hooks.click();
+      setPanel(false);
+    });
+  }
+
+  if (playerClose) {
+    playerClose.addEventListener('click', function () {
+      hooks.click();
+      setPlayerVisible(false);
+    });
+  }
+
+  if (btnRestorePlayer) {
+    btnRestorePlayer.addEventListener('click', function () {
+      hooks.click();
+      setPlayerVisible(true);
+    });
   }
 
   g.Player = {
@@ -415,15 +448,23 @@
       Object.assign(hooks, h || {});
       applyAuto();
       $('icoVol').style.opacity = prefs.vol === 0 ? .4 : 1;
-      player.hidden = false;
+      setPlayerVisible(true);
       syncLibrary();
     },
-    isPanelOpen: function () { return !panel.hidden; },
-    togglePanel: function () { setPanel(panel.hidden); return !panel.hidden; },
-    closePanel: function () { if (!panel.hidden) setPanel(false); },
-    upload: function () { showPlayer(); fileInput.click(); }
+    isPanelOpen: function () { return searchBar && !searchBar.hidden; },
+    togglePanel: function () {
+      if (!searchBar) return false;
+      setPanel(searchBar.hidden);
+      return !searchBar.hidden;
+    },
+    closePanel: function () { if (searchBar && !searchBar.hidden) setPanel(false); },
+    showPlayer: function () { setPlayerVisible(true); },
+    upload: function () { setPlayerVisible(true); fileInput.click(); }
   };
 
-  $('panelClose').addEventListener('click', function () { setPanel(false); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') Player.closePanel(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      if (searchBar && !searchBar.hidden) setPanel(false);
+    }
+  });
 })(window);
