@@ -80,9 +80,9 @@
     b.rect = function (x, y, w, h, fill, ex) {
       return b.add('<rect x="' + f(x) + '" y="' + f(y) + '" width="' + f(w) + '" height="' + f(h) + '" fill="' + fill + '" ' + (ex || '') + '/>');
     };
-    b.poly = function (p, fill, ex) { return b.add('<polygon points="' + P(p) + '" fill="' + fill + '" ' + (ex || '') + '/>'); };
-    b.circ = function (x, y, r, fill, ex) { return b.add('<circle cx="' + f(x) + '" cy="' + f(y) + '" r="' + f(r) + '" fill="' + fill + '" ' + (ex || '') + '/>'); };
-    b.ell = function (x, y, rx, ry, fill, ex) { return b.add('<ellipse cx="' + f(x) + '" cy="' + f(y) + '" rx="' + f(rx) + '" ry="' + f(ry) + '" fill="' + fill + '" ' + (ex || '') + '/>'); };
+    b.poly = function (p, fill, ex) { return b.add('<polygon points="' + P(p) + '" fill="' + fill + '" stroke="none" ' + (ex || '') + '/>'); };
+    b.circ = function (x, y, r, fill, ex) { return b.add('<circle cx="' + f(x) + '" cy="' + f(y) + '" r="' + f(r) + '" fill="' + fill + '" stroke="none" ' + (ex || '') + '/>'); };
+    b.ell = function (x, y, rx, ry, fill, ex) { return b.add('<ellipse cx="' + f(x) + '" cy="' + f(y) + '" rx="' + f(rx) + '" ry="' + f(ry) + '" fill="' + fill + '" stroke="none" ' + (ex || '') + '/>'); };
 
     b.sky = function (stops) { return b.rect(0, 0, VW, VH, b.grad(stops)); };
 
@@ -95,7 +95,7 @@
 
     b.cloud = function (x, y, s, op, col) {
       var t = (50 + b.r() * 50).toFixed(0);
-      return b.add('<g class="cl" style="--t:' + t + 's" opacity="' + (op || .9) + '" fill="' + (col || '#fff') + '">' +
+      return b.add('<g class="cl" style="--t:' + t + 's" opacity="' + (op || .9) + '" fill="' + (col || '#fff') + '" stroke="none">' +
         '<ellipse cx="' + x + '" cy="' + y + '" rx="' + 90 * s + '" ry="' + 26 * s + '"/>' +
         '<ellipse cx="' + (x - 40 * s) + '" cy="' + (y - 18 * s) + '" rx="' + 46 * s + '" ry="' + 30 * s + '"/>' +
         '<ellipse cx="' + (x + 28 * s) + '" cy="' + (y - 26 * s) + '" rx="' + 52 * s + '" ry="' + 34 * s + '"/></g>');
@@ -104,7 +104,7 @@
     b.hills = function (y, amp, color, seed) {
       var ph = seed || 0, d = 'M0,' + VH + 'L0,' + f(y);
       for (var x = 0; x <= VW; x += 40) d += 'L' + x + ',' + f(y + Math.sin(x * 0.004 + ph) * amp + Math.sin(x * 0.011 + ph * 2) * amp * 0.4);
-      return b.add('<path d="' + d + 'L' + VW + ',' + VH + 'Z" fill="' + color + '"/>');
+      return b.add('<path d="' + d + 'L' + VW + ',' + VH + 'Z" fill="' + color + '" stroke="none"/>');
     };
 
     // wide ground with a faint cobble pattern, from y down to the bottom
@@ -253,7 +253,8 @@
       var d = o.sharp ? p : spline(p), c = ZC[kind] || ZC.grass;
       b.zones.push({ poly: d, area: area(d), box: bbox(d) });
       var gr = b.grad([[0, o.c1 || c.top], [1, o.c2 || c.bot]]);
-      b.add('<polygon points="' + P(d) + '" fill="' + gr + '" stroke="' + (o.edge || c.edge) + '" stroke-width="' + (o.sw == null ? 5 : o.sw) + '" stroke-linejoin="round"/>');
+      var sw = o.sw != null ? o.sw : (o.edge ? 3 : 0);
+      b.add('<polygon points="' + P(d) + '" fill="' + gr + '"' + (sw > 0 ? (' stroke="' + (o.edge || c.edge) + '" stroke-width="' + sw + '" stroke-linejoin="round"') : '') + '/>');
       return b.add('<polygon points="' + P(d) + '" fill="url(#' + (o.pat || c.pat) + ')"/>');
     };
 
@@ -283,9 +284,6 @@
     };
 
     b.build = function () {
-      var vg = b.id('v');
-      b.defs.push('<radialGradient id="' + vg + '" cx=".5" cy=".5" r=".75"><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#3a2a40" stop-opacity=".22"/></radialGradient>');
-      b.add('<rect width="' + VW + '" height="' + VH + '" fill="url(#' + vg + ')"/>');
       var svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + VW + ' ' + VH + '" preserveAspectRatio="xMidYMid slice"><defs>' + PATTERNS + b.defs.join('') + '</defs>' + b.out.join('') + '</svg>';
       return { svg: svg, zones: b.zones };
     };
@@ -307,6 +305,33 @@
   function def(name, o, fn) { o.name = name; o.draw = fn; LIST.push(o); }
 
   var dayCol = [[0, '#bfe3f5'], [.5, '#e6f4f3'], [1, '#fdeede']];
+
+  // --- The original classic flower field: soft sky, rolling hills, glowing sun, lush meadow ---
+  def('Field of Flowers · Classic', { persp: [360, 900], kr: [.38, 1.33], count: 85 }, function (b) {
+    b.sky([[0, '#bfe2f0'], [0.28, '#e4f3ee'], [0.40, '#f8efe0'], [1, '#f8efe0']]);
+
+    var sid = b.id('sun_grad');
+    b.defs.push(
+      '<radialGradient id="' + sid + '">' +
+        '<stop offset="0%" stop-color="#fff6d6" stop-opacity="0.95"/>' +
+        '<stop offset="38%" stop-color="#fff6d6" stop-opacity="0.55"/>' +
+        '<stop offset="70%" stop-color="#fff6d6" stop-opacity="0"/>' +
+      '</radialGradient>'
+    );
+    b.circ(1300, 170, 200, 'url(#' + sid + ')');
+
+    // Hill a (left) & Hill b (right) exactly matching the initial commit
+    b.ell(336, 387, 624, 108, '#bddba7');
+    b.ell(1280, 410, 672, 99, '#a9d190');
+
+    // Ground: horizon to bottom, seamless grass zone
+    b.zone('grass', [[-20, 359], [VW + 20, 359], [VW + 20, VH + 20], [-20, VH + 20]], {
+      sharp: true,
+      sw: 0,
+      c1: '#95c978',
+      c2: '#5f9c4e'
+    });
+  });
 
   // --- city park ---
   def('City Park · Morning', { persp: [580, 870] }, function (b) {

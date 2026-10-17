@@ -60,36 +60,41 @@
 
   <input id="file" type="file" accept="audio/*" multiple hidden>
 
-  <!-- ===== player: bottom middle ===== -->
-  <section id="player" class="player" aria-label="Music player" hidden>
+  <!-- ===== player: bottom middle floating controls ===== -->
+  <section id="player" class="player" aria-label="Music player">
     <input id="seek" class="range seek" type="range" min="0" max="1000" value="0" aria-label="Seek">
     <div class="prow">
-      <div class="meta">
+      <div class="meta" id="playerMeta">
         <img id="art" class="art" alt="" hidden>
         <div class="art ph" id="artPh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg></div>
-        <div class="txt"><b id="title">Nothing playing</b><span id="sub">Search or upload a song</span></div>
+        <div class="txt"><b id="title">Field of Flowers</b><span id="sub">Search or upload a song</span></div>
       </div>
 
       <div class="ctrls">
+        <button id="btnPlayerSearch" class="ctl search-btn" type="button" aria-label="Search music" title="Search music">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+        </button>
         <button id="auto" class="ctl auto on" type="button" aria-pressed="true" aria-label="Autoplay next song" title="Autoplay">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3l3 3-3 3"/><path d="M4 11V9a3 3 0 0 1 3-3h13"/><path d="M7 21l-3-3 3-3"/><path d="M20 13v2a3 3 0 0 1-3 3H4"/></svg>
           <i>Auto</i>
         </button>
-        <button id="prev" class="ctl" type="button" aria-label="Previous song">
+        <button id="prev" class="ctl" type="button" aria-label="Previous song" title="Previous">
           <svg viewBox="0 0 24 24" aria-hidden="true" class="solid"><path d="M7 5v14"/><path d="M19 5.5v13a1 1 0 0 1-1.6.8l-8.7-6.5a1 1 0 0 1 0-1.6l8.7-6.5a1 1 0 0 1 1.6.8z"/></svg>
         </button>
-        <button id="play" class="ctl big" type="button" aria-label="Play">
+        <button id="play" class="ctl big" type="button" aria-label="Play" title="Play">
           <svg id="icoPlay" viewBox="0 0 24 24" aria-hidden="true" class="solid"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10.5-6.5a1 1 0 0 0 0-1.8L9.5 4.6A1 1 0 0 0 8 5.5z"/></svg>
           <svg id="icoPause" viewBox="0 0 24 24" aria-hidden="true" class="solid" hidden><rect x="6.5" y="5" width="4" height="14" rx="1.2"/><rect x="13.5" y="5" width="4" height="14" rx="1.2"/></svg>
           <span id="spin" class="spin" hidden></span>
         </button>
-        <button id="next" class="ctl" type="button" aria-label="Next song">
+        <button id="next" class="ctl" type="button" aria-label="Next song" title="Next">
           <svg viewBox="0 0 24 24" aria-hidden="true" class="solid"><path d="M17 5v14"/><path d="M5 5.5v13a1 1 0 0 0 1.6.8l8.7-6.5a1 1 0 0 0 0-1.6L6.6 4.7A1 1 0 0 0 5 5.5z"/></svg>
         </button>
       </div>
 
       <div class="vol">
-        <svg id="icoVol" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+        <button id="btnMute" class="ctl mute-btn" type="button" aria-label="Mute/unmute" title="Volume">
+          <svg id="icoVol" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg>
+        </button>
         <input id="vol" class="range" type="range" min="0" max="100" value="70" aria-label="Volume">
       </div>
     </div>

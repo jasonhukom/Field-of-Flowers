@@ -180,8 +180,9 @@
 
   function showNow() {
     var s = lib[cur];
-    $('title').textContent = s ? s.title : 'Nothing playing';
-    $('sub').textContent = s ? (s.artist || '') : 'Search or upload a song';
+    $('title').textContent = s ? s.title : 'Field of Flowers';
+    $('sub').textContent = s ? (s.artist || '') : 'Click search to play music';
+    player.classList.toggle('has-track', !!s);
     var art = $('art');
     if (s && s.thumb) { art.src = s.thumb; art.hidden = false; $('artPh').hidden = true; art.onerror = function () { art.hidden = true; $('artPh').hidden = false; }; }
     else { art.hidden = true; $('artPh').hidden = false; }
@@ -280,9 +281,17 @@
 
   /* ---------- controls ---------- */
 
-  $('play').addEventListener('click', toggle);
-  $('next').addEventListener('click', function () { step(1); });
-  $('prev').addEventListener('click', prev);
+  $('play').addEventListener('click', function () { hooks.click(); toggle(); });
+  $('next').addEventListener('click', function () { hooks.click(); step(1); });
+  $('prev').addEventListener('click', function () { hooks.click(); prev(); });
+
+  var btnPlayerSearch = $('btnPlayerSearch');
+  if (btnPlayerSearch) {
+    btnPlayerSearch.addEventListener('click', function () {
+      hooks.click();
+      setPanel(panel.hidden);
+    });
+  }
 
   function applyAuto() {
     var b = $('auto');
@@ -290,6 +299,7 @@
     b.setAttribute('aria-pressed', prefs.auto ? 'true' : 'false');
   }
   $('auto').addEventListener('click', function () {
+    hooks.click();
     prefs.auto = !prefs.auto; savePrefs(); applyAuto();
     hooks.toast(prefs.auto ? 'Autoplay on' : 'Autoplay off');
   });
@@ -299,6 +309,25 @@
     prefs.vol = +vol.value; audio.volume = prefs.vol / 100; setRange(vol); savePrefs();
     $('icoVol').style.opacity = prefs.vol === 0 ? .4 : 1;
   });
+
+  var btnMute = $('btnMute');
+  var lastVol = 70;
+  if (btnMute) {
+    btnMute.addEventListener('click', function () {
+      hooks.click();
+      if (prefs.vol > 0) {
+        lastVol = prefs.vol;
+        prefs.vol = 0;
+      } else {
+        prefs.vol = lastVol || 70;
+      }
+      vol.value = prefs.vol;
+      audio.volume = prefs.vol / 100;
+      setRange(vol);
+      savePrefs();
+      $('icoVol').style.opacity = prefs.vol === 0 ? .4 : 1;
+    });
+  }
 
   seek.addEventListener('input', function () { seeking = true; setRange(seek); });
   seek.addEventListener('change', function () {
@@ -374,12 +403,10 @@
   function setPanel(open) {
     panel.hidden = !open;
     $('btnSearch').classList.toggle('active', open);
+    if ($('btnPlayerSearch')) $('btnPlayerSearch').classList.toggle('active', open);
     if (open) {
-      showPlayer();
       render();
       if (!lib.length || tab === 'results') setTimeout(function () { if (!panel.hidden && window.innerWidth > 700) q.focus(); }, 60);
-    } else if (audio.paused && !Object.keys(loading).length) {
-      player.hidden = true;     // nothing playing: tuck the dock away again
     }
   }
 
@@ -388,6 +415,7 @@
       Object.assign(hooks, h || {});
       applyAuto();
       $('icoVol').style.opacity = prefs.vol === 0 ? .4 : 1;
+      player.hidden = false;
       syncLibrary();
     },
     isPanelOpen: function () { return !panel.hidden; },

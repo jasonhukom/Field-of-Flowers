@@ -302,5 +302,5 @@
 
   layout();
   Player.init({ toast: toast, click: function () { Sfx.click(); } });
-  setScene(Math.floor(Math.random() * Scenes.list.length), true);
+  setScene(0, true);
 })();
